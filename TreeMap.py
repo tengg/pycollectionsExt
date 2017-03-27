@@ -44,3 +44,21 @@ class TreeMap(dict):
         self.__bst = utils.RBTree()
         self.__map.clear()
         dict.clear(self)
+
+    def ceilingKey(self, key):
+        pass
+
+    def floorKey(self, key):
+        pass
+
+    def firstKey(self):
+        pass
+
+    def higherKey(self):
+        pass
+
+    def lastKey(self):
+        pass
+
+    def lowerKey(self):
+        pass

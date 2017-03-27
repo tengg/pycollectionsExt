@@ -18,7 +18,7 @@ class RBTree:
         t = self.root
         if not t:
             self.root = RBTreeNode(val)
-            return
+            return self.root
         while t:
             parent = t
             if t.val < val:
@@ -35,8 +35,43 @@ class RBTree:
         self._fix_after_insertion(e)
         return e
 
-    def delete(self, val):
-        pass
+    def delete(self, p):
+        'Delete the specified entry from the tree'
+        if p.left and p.right:
+            s = self.successor(p)
+            self._swap_nodes(s, p)
+            if p is self.root:
+                self.root = s
+
+    def successor(self, t):
+        'Return the successor of the specified entry, or None if no such.'
+        if not t:
+            return None
+        if t.right:
+            p = t.right
+            while p.left:
+                p = p.left
+        else:
+            ch, p = t, t.parent
+            while p and ch is p.right:
+                ch = p
+                p = p.parent
+        return p
+
+    def predecessor(self, t):
+        'Return the predecessor of the specified entry, or None if no such.'
+        if not t:
+            return None
+        if t.left:
+            p = t.left
+            while p.right:
+                p = p.right
+        else:
+            ch, p = t, t.parent
+            while p and ch is p.left:
+                ch = p
+                p = p.parent
+        return p
 
     def _fix_after_insertion(self, x):
         x.black = False
@@ -94,6 +129,7 @@ class RBTree:
             p.left = l.right
             if l.right:
                 l.right.parent = p
+            l.parent = p.parent
             if not p.parent:
                 self.root = l
             elif p.parent.right is p:
@@ -118,3 +154,18 @@ class RBTree:
                     res.append('#')
             level = nl
         print(''.join(res).rstrip('#'))
+
+    def _swap_nodes(self, n1, n2):
+        n1l, n1r, n1p = n1.left, n1.right, n1.parent
+        if n1p:
+            if n1p.left is n1:
+                n1p.left = n2
+            else:
+                n1p.right = n2
+        n1.left, n1.right, n1.parent = n2.left, n2.right, n2.parent
+        if n2.parent:
+            if n2.parent.left is n2:
+                n2.parent.left = n1
+            else:
+                n2.parent.right = n1
+        n2.left, n2.right, n2.parent = n1l, n1r, n1p

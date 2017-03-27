@@ -15,6 +15,7 @@ class RBTree:
         return self.root
 
     def insert(self, val):
+        'Insert a new node that has specified value'
         t = self.root
         if not t:
             self.root = RBTreeNode(val)
@@ -42,6 +43,29 @@ class RBTree:
             self._swap_nodes(s, p)
             if p is self.root:
                 self.root = s
+        replacement = p.left or p.right
+        if replacement:
+            replacement.parent = p.parent
+            if not p.parent:
+                self.root = replacement
+            elif p is p.parent.left:
+                p.parent.left = replacement
+            else:
+                p.parent.right = replacement
+            p.left = p.right = p.parent = None
+            if p.black:
+                self._fix_after_deletion(replacement)
+        elif not p.parent:
+            self.root = None
+        else:
+            if p.black:
+                self._fix_after_deletion(p)
+            if p.parent:
+                if p is p.parent.left:
+                    p.parent.left = None
+                elif p is p.parent.right:
+                    p.parent.right = None
+                p.parent = None
 
     def successor(self, t):
         'Return the successor of the specified entry, or None if no such.'
@@ -105,7 +129,48 @@ class RBTree:
         self.root.black = True
 
     def _fix_after_deletion(self, x):
-        pass
+        while x is not self.root and x.black:
+            if x is x.parent.left:
+                sib = x.parent.right
+                if not sib.black:
+                    sib.black = True
+                    sib.parent.black = False
+                    self._rotate_left(x.parent)
+                    sib = x.parent.right
+                if sib.left.black and sib.right.black:
+                    sib.black = False
+                    x = x.parent
+                else:
+                    if sib.right.black:
+                        sib.left.black = True
+                        sib.black = False
+                        self._rotate_right(sib)
+                        sib = x.parent.right
+                    sib.black = x.parent.black
+                    x.parent.black = sib.right.black = True
+                    self._rotate_left(x.parent)
+                    x = root
+            else:
+                sib = x.parent.left
+                if not sib.black:
+                    sib.black = True
+                    x.parent.black = False
+                    self._rotate_right(x.parent)
+                    sib = x.parent.left
+                if sib.right.black and sib.left.black:
+                    sib.black = False
+                    x = x.parent
+                else:
+                    if sib.left.black:
+                        sib.right.black = True
+                        sib.black = False
+                        self._rotate_left(sib)
+                        sib = x.parent.left
+                    sib.black = x.parent.black
+                    x.parent.black = sib.left.black = True
+                    self._rotate_right(x.parent)
+                    x = root
+        x.black = True
 
     def _rotate_left(self, p):
         if p:
